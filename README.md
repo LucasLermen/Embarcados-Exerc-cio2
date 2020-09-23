@@ -22,6 +22,6 @@ $ python3 sensorLCD.py
 #### Soulução em C
 ```
 $ cd C
-$ gcc bme280.c sensor2.c -o exe
+$ gcc bme280.c sensor.c -o exe
 $ ./exe "/dev/i2c-1"
 ```
