@@ -307,9 +307,16 @@ int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
     double mediaPressao = 0.0, somaPressao = 0.0;
     int qtd = 0;
 
+    struct tm *data_hora_atual;
+    time_t segundos;
 
+    FILE *file = fopen("medicoes.csv", "w");
+    fprintf(file, "Temperatura, Pressão, Umidade, Data e hora\n");
+    fclose(file);
+    
     /* Continuously stream sensor data */
-    printf("Temperature, Pressure, Humidity\n");
+    printf("Temperatura, Pressao, Umidade\n");
+    
     while (1)
     {   
         sleep(1);
@@ -330,6 +337,11 @@ int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
             fprintf(stderr, "Failed to get sensor data (code %+d).", rslt);
             break;
         }
+
+
+        time(&segundos);
+
+        data_hora_atual = localtime(&segundos); 
         
         somaTemperatura += comp_data.temperature;
         somaUmidade += comp_data.humidity;
@@ -348,8 +360,33 @@ int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
             mediaUmidade = somaUmidade/qtd;
             mediaPressao = somaPressao/qtd;
             printf ("-------------MEDIA-------------\n");
-            printf("%.2lf deg C, %.2lf hPa, %.2lf%\n", mediaTemperatura, mediaPressao, mediaUmidade);
+            printf("%.2lf deg C, %.2lf hPa, %.2lf% ", mediaTemperatura, mediaPressao, mediaUmidade);
+            
+            printf(" %02d/", data_hora_atual->tm_mday);
+            printf("%02d/",data_hora_atual->tm_mon+1); //mês
+            printf("%02d ",data_hora_atual->tm_year+1900); //an
+            
+            printf("%02d:",data_hora_atual->tm_hour);//hora   
+            printf("%02d:",data_hora_atual->tm_min);//minuto
+            printf("%02d\n",data_hora_atual->tm_sec);//segundo 
+
+
             printf ("-------------------------------\n");
+
+            FILE *file = fopen("medicoes.csv", "a");
+            fprintf(file, "%.2lf deg C, %.2lf hPa, %.2lf%, ", mediaTemperatura, mediaPressao, mediaUmidade);
+            
+            fprintf(file,"%02d/", data_hora_atual->tm_mday);
+            fprintf(file,"%02d/",data_hora_atual->tm_mon+1); //mês
+            fprintf(file,"%02d ",data_hora_atual->tm_year+1900); //an
+            
+            fprintf(file,"%02d:",data_hora_atual->tm_hour);//hora   
+            fprintf(file,"%02d:",data_hora_atual->tm_min);//minuto
+            fprintf(file,"%02d\n",data_hora_atual->tm_sec);//segundo 
+
+            
+            fclose(file);
+            
             clockTotal = 0.0;
             somaTemperatura = 0.0;
             somaUmidade = 0.0;
@@ -357,6 +394,6 @@ int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
             qtd = 0;
         }        
     }
-    
+
     return rslt;
 }
